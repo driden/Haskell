@@ -62,15 +62,10 @@ module Lab1 where
     cantProp (Bc bin q r) = cantProp q + cantProp r
     
     --2.6--
-    listarRepe :: Form -> [Var]
-    listarRepe (L q)        = [q]
-    listarRepe (Not q)      = listarProp q
-    listarRepe (Bc bin q r) = listarProp q ++ listarProp r
------ HACEr BIEN ESTO QUE ESTA MALLL ------------
     listarProp :: Form -> [Var]
     listarProp (L q)        = [q]
     listarProp (Not q)      = listarProp q
-    listarProp (Bc bin q r) = listarProp q ++ listarProp r
+    listarProp (Bc bin q r) = mergeArray (listarProp q) (listarProp r)
     
     --2.7--
     sustCon :: BinCon -> BinCon -> Form ->  Form
@@ -78,11 +73,19 @@ module Lab1 where
     sustCon c1 c2 (Not q)      = Not (sustCon c1 c2 q)
     sustCon c1 c2 (Bc bin q r) = if bin == c1 then Bc c2 (sustCon c1 c2 q) (sustCon c1 c2 r) 
                                  else Bc bin (sustCon c1 c2 q) (sustCon c1 c2 r)
-    {-
+
     --2.8--
     swapCon :: BinCon -> BinCon -> Form -> Form
-    swapCon = undefined
+    swapCon c1 c2 (L q)        = L q
+    swapCon c1 c2 (Not q)      = Not (swapCon c1 c2 q)
+    swapCon c1 c2 (Bc bin q r) = if bin == c1 then
+                                    Bc c2 (swapCon c1 c2 q) (swapCon c1 c2 r)
+                                else if bin == c2 then
+                                    Bc c1 (swapCon c1 c2 q) (swapCon c1 c2 r)
+                                else 
+                                    Bc bin (swapCon c1 c2 q) (swapCon c1 c2 r)
     
+{-
     --2.9--
     dobleNeg :: Form -> Form
     dobleNeg = undefined
@@ -101,3 +104,11 @@ module Lab1 where
         [] -> False;
         x:xs -> (e == x) || inArray e xs;
     }
+
+    mergeArray :: [Var] -> [Var] -> [Var]
+    mergeArray [] ys = ys
+    mergeArray xs [] = xs
+    mergeArray (x:xs) ys = 
+                    if inArray x xs || inArray x ys then 
+                        mergeArray xs ys 
+                    else x:mergeArray xs ys
